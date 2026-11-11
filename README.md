@@ -16,7 +16,7 @@ A development Figma plugin, written as an independent student prototype by Imman
 - Auto-reflow is off by default. When **Auto-reflow after I stop typing** is on, the plugin waits 1.2 seconds after the last edit, then reflows. It reacts to real text edits, resizes, and deletes of linked frames, and it ignores its own writes by comparing content. If the text changes during a reflow, that pass is thrown away and retried from the new text.
 - If a linked frame is deleted, the next reflow drops it from the chain and flows its text into the remaining frames. Undo of that delete puts the frame back in its original place and reflows again, without duplicating the old text.
 - Selecting a frame named Box A, Box B, or Box C uses its single text child. Layers named Label A, Label B, or Label C are ignored. Directly selected text layers are linked too.
-- Empty frames are allowed. Fonts used by the story are loaded before writing. If a font is missing, the plugin falls back to Inter.
+- Empty frames are allowed. Inter Regular and Bold are loaded first, then each font used by the story is loaded before writing. If a frame's font is mixed and no styled runs can be read, the body style uses Inter Regular.
 - The plugin does not use the network (`allowedDomains` is `none`).
 
 ![Still of the plugin's three linked columns](docs/outcome.png)
