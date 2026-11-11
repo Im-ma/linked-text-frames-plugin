@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Linked Text Frames</title>
+  <style>
+    :root {
+      --bg: var(--figma-color-bg, #ffffff);
+      --text: var(--figma-color-text, #1a1a1a);
+      --secondary: var(--figma-color-text-secondary, #757575);
+      --border: var(--figma-color-border, #e0e0e0);
+      --blue: #0d99ff;
+      --red: #f24822;
+      --green: #14ae5c;
+      --warn-bg: #fff4e5;
+      --panel: var(--figma-color-bg-secondary, #f5f5f5);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 12px/1.4 Inter, system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      padding: 12px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .sub {
+      color: var(--secondary);
+      margin-bottom: 12px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font: 12px/1 Inter, system-ui, sans-serif;
+      cursor: pointer;
+      flex: 1;
+      min-width: 90px;
+    }
+    button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      font-weight: 600;
+    }
+    button.danger {
+      color: var(--red);
+      border-color: #f5c4ba;
+    }
+    button:hover { filter: brightness(0.98); }
+    fieldset {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 0 0 10px;
+    }
+    legend {
+      padding: 0 4px;
+      color: var(--secondary);
+      font-size: 11px;
+    }
+    label.opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px 0;
+      color: var(--text);
+    }
+    .status {
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      min-height: 72px;
+      white-space: pre-wrap;
+    }
+    .status.warn { background: var(--warn-bg); border-color: #f0c36d; }
+    .status.error { background: #ffefec; border-color: #f5c4ba; color: var(--red); }
+    .status.ok { border-color: #b7e0c5; }
+    .meta {
+      margin-top: 8px;
+      color: var(--secondary);
+      font-size: 11px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e6f4ff;
+      color: var(--blue);
+      font-weight: 600;
+      font-size: 11px;
+      margin-right: 6px;
+    }
+    .pill.danger {
+      background: #ffefec;
+      color: var(--red);
+    }
+  </style>
+</head>
+<body>
+  <h1>Linked Text Frames</h1>
+  <div class="sub">Prototype plugin. Independent student work. Not affiliated with Figma.</div>
+
+  <fieldset>
+    <legend>Link</legend>
+    <label class="opt"><input type="radio" name="order" value="selection" checked /> Selection order</label>
+    <label class="opt"><input type="radio" name="order" value="spatial" /> Left to right / top to bottom</label>
+    <div class="row">
+      <button class="primary" id="link">Link selected text</button>
+    </div>
+  </fieldset>
+
+  <div class="row">
+    <button id="reflow">Reflow</button>
+    <button class="danger" id="unlink">Unlink</button>
+  </div>
+
+  <fieldset>
+    <legend>Options</legend>
+    <label class="opt"><input type="checkbox" id="auto" /> Auto-reflow after I stop typing (off by default)</label>
+    <label class="opt"><input type="checkbox" id="overlay" checked /> Show overlay (lines + badges)</label>
+  </fieldset>
+
+  <div id="status" class="status">Ready.</div>
+  <div id="meta" class="meta"></div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const metaEl = document.getElementById("meta");
+
+    function orderMode() {
+      const el = document.querySelector('input[name="order"]:checked');
+      return el && el.value === "spatial" ? "spatial" : "selection";
+    }
+
+    document.getElementById("link").onclick = () => {
+      parent.postMessage({ pluginMessage: { type: "link-selection", orderMode: orderMode() } }, "*");
+    };
+    document.getElementById("reflow").onclick = () => {
+      parent.postMessage({ pluginMessage: { type: "reflow" } }, "*");
+    };
+    document.getElementById("unlink").onclick = () => {
+      parent.postMessage({ pluginMessage: { type: "unlink" } }, "*");
+    };
+    document.getElementById("auto").onchange = (e) => {
+      parent.postMessage({ pluginMessage: { type: "set-auto-reflow", enabled: e.target.checked } }, "*");
+    };
+    document.getElementById("overlay").onchange = (e) => {
+      parent.postMessage({ pluginMessage: { type: "toggle-overlay", visible: e.target.checked } }, "*");
+    };
+
+    onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg || msg.type !== "status") return;
+      statusEl.className = "status" + (msg.tone && msg.tone !== "info" ? " " + msg.tone : "");
+      statusEl.textContent = msg.message || "";
+      const bits = [];
+      if (msg.story) {
+        bits.push('<span class="pill">' + msg.story.count + " frames</span>");
+        if (msg.story.overflow) bits.push('<span class="pill danger">Overflow</span>');
+        if (msg.story.missing) bits.push('<span class="pill danger">' + msg.story.missing + " missing</span>");
+        bits.push("Story " + msg.story.id);
+      }
+      bits.push(msg.autoReflow ? "Auto-reflow on" : "Auto-reflow off");
+      bits.push(msg.overlayVisible ? "Overlay on" : "Overlay off");
+      metaEl.innerHTML = bits.join(" · ");
+    };
+
+    parent.postMessage({ pluginMessage: { type: "ready" } }, "*");
+  </script>
+</body>
+</html>

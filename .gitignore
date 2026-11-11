@@ -1,0 +1,6 @@
+node_modules/
+
+# tsc incremental cache. code.js is the Figma entry (manifest "main") and stays committed.
+*.tsbuildinfo
+dist/
+build/

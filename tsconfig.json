@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2018"],
+    "strict": true,
+    "typeRoots": ["./node_modules/@types", "./node_modules/@figma"],
+    "skipLibCheck": true,
+    "outDir": ".",
+    "rootDir": ".",
+    "noEmitOnError": true
+  },
+  "include": ["code.ts"],
+  "exclude": ["node_modules"]
+}

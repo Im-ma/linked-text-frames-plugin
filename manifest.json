@@ -1,0 +1,12 @@
+{
+  "name": "Linked Text Frames (Prototype)",
+  "id": "linked-text-frames-prototype-immanuel",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}
